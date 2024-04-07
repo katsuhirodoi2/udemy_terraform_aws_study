@@ -1,0 +1,34 @@
+name: Create Pull Request
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BRANCH: test-${{ github.run_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "${BRANCH}"
+          git commit -m "Add empty commit" --allow-empty
+          git push origin "${BRANCH}"
+
+      - name: Get Token
+        env:
+          APP_ID: ${{ secrets.APP_ID }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        run: |
+          chmod +x .github/workflows/get_github_token.sh
+          export GH_TOKEN="$(.github/workflows/get_github_token.sh)"
+          echo "GH_TOKEN=$GH_TOKEN" >> $GITHUB_ENV
+
+      - name: Create PR
+        run: |
+          gh pr create --base "main" --title "PR by workflow" --body ""
