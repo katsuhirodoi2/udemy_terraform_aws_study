@@ -8,7 +8,7 @@ data "aws_ami" "app" {
 
   filter {
     name   = "name"
-    values = ["tastylog-app-ami"]
+    values = ["${var.project}-${var.environment}-app-ami"]
   }
 }
 
